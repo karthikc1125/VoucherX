@@ -1,4 +1,4 @@
-# VoucherX | save with AI
+# VoucherX | Save with AI
 
 **Don't let your vouchers expire. Trade. Earn. Repeat.**
 
