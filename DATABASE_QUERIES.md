@@ -1,6 +1,6 @@
 # VoucherX Database Table Creation Queries
 
-## Complete SQL for All 
+## Complete SQL for All Tables
 
 ### 1. PROFILES TABLE (User Accounts)
 ```sql
