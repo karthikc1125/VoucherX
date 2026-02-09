@@ -1,59 +1,108 @@
-import { useState } from 'react';
-import { Heart, Plus, Bell, BellOff, X, Trash2 } from 'lucide-react';
-
-interface WishlistItem {
-  id: string;
-  brand_name: string;
-  category: string;
-  max_price?: number;
-  notify: boolean;
-}
-
-const wishlistItems: WishlistItem[] = [
-  {
-    id: '1',
-    brand_name: 'Apple',
-    category: 'tech',
-    max_price: 150,
-    notify: true,
-  },
-  {
-    id: '2',
-    brand_name: 'Sephora',
-    category: 'health',
-    max_price: 75,
-    notify: true,
-  },
-  {
-    id: '3',
-    brand_name: 'Whole Foods',
-    category: 'food',
-    max_price: 50,
-    notify: false,
-  },
-];
-
-const matchingVouchers = [
-  { brand: 'Apple', count: 3, lowestPrice: 120, discount: 20 },
-  { brand: 'Sephora', count: 5, lowestPrice: 60, discount: 18 },
-];
+import { useState, useEffect } from 'react';
+import { Heart, Plus, Bell, BellOff, X, Trash2, Loader } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { WishlistItem } from '../types';
 
 export default function Wishlist() {
+  const { user } = useAuth();
+  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Form State
   const [brandName, setBrandName] = useState('');
   const [category, setCategory] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
   const categories = ['tech', 'food', 'fashion', 'travel', 'entertainment', 'health'];
 
-  const handleAddWishlist = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Adding to wishlist:', { brandName, category, maxPrice });
-    setBrandName('');
-    setCategory('');
-    setMaxPrice('');
-    setShowAddForm(false);
+  // Mock matching vouchers (for now, can be dynamic later)
+  const matchingVouchers = [
+    { brand: 'Apple', count: 3, lowestPrice: 120, discount: 20 },
+    { brand: 'Sephora', count: 5, lowestPrice: 60, discount: 18 },
+  ];
+
+  useEffect(() => {
+    if (user) {
+      fetchWishlist();
+    }
+  }, [user]);
+
+  const fetchWishlist = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('wishlists')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setItems(data || []);
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleAddWishlist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setSubmitting(true);
+    try {
+      const newItem = {
+        user_id: user.id,
+        brand_name: brandName,
+        category,
+        max_price: maxPrice ? parseFloat(maxPrice) : null,
+        notify: true
+      };
+
+      const { data, error } = await supabase
+        .from('wishlists')
+        .insert([newItem])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setItems([data, ...items]);
+      setBrandName('');
+      setCategory('');
+      setMaxPrice('');
+      setShowAddForm(false);
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      alert('Failed to add item. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('wishlists')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setItems(items.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader className="h-8 w-8 text-pink-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -138,9 +187,10 @@ export default function Wishlist() {
             </div>
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-pink-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+              disabled={submitting}
+              className="w-full bg-gradient-to-r from-pink-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
             >
-              Add to Wishlist
+              {submitting ? 'Adding...' : 'Add to Wishlist'}
             </button>
           </form>
         </div>
@@ -173,9 +223,9 @@ export default function Wishlist() {
       )}
 
       <div>
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Your Wishlist ({wishlistItems.length})</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-4">Your Wishlist ({items.length})</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {wishlistItems.map(item => (
+          {items.map(item => (
             <div
               key={item.id}
               className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all"
@@ -201,11 +251,10 @@ export default function Wishlist() {
 
               <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                 <button
-                  className={`flex items-center space-x-2 text-sm font-medium transition-colors ${
-                    item.notify
+                  className={`flex items-center space-x-2 text-sm font-medium transition-colors ${item.notify
                       ? 'text-emerald-600 hover:text-emerald-700'
                       : 'text-slate-600 hover:text-slate-700'
-                  }`}
+                    }`}
                 >
                   {item.notify ? (
                     <>
@@ -219,7 +268,10 @@ export default function Wishlist() {
                     </>
                   )}
                 </button>
-                <button className="text-red-600 hover:text-red-700 transition-colors">
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-red-600 hover:text-red-700 transition-colors"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -227,7 +279,7 @@ export default function Wishlist() {
           ))}
         </div>
 
-        {wishlistItems.length === 0 && (
+        {items.length === 0 && (
           <div className="text-center py-16 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200">
             <Heart className="h-16 w-16 text-slate-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-700 mb-2">Your wishlist is empty</h3>

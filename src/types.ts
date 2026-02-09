@@ -46,3 +46,13 @@ export interface Trade {
     initiator_voucher?: Voucher;
     recipient_voucher?: Voucher;
 }
+
+export interface WishlistItem {
+    id: string;
+    user_id: string;
+    brand_name: string;
+    category: string;
+    max_price?: number;
+    notify: boolean;
+    created_at: string;
+}
