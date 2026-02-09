@@ -12,6 +12,8 @@ import Wishlist from './pages/Wishlist';
 import Profile from './pages/Profile';
 import { Voucher } from './types';
 import { Bot } from 'lucide-react';
+import ExpiryInsights from "./pages/ExpiryInsights";
+
 
 const mockUserVouchers: Voucher[] = [
   {
@@ -125,6 +127,9 @@ function AppContent() {
         return <Wishlist />;
       case 'profile':
         return <Profile />;
+      case 'expiry-insights':
+        return <ExpiryInsights />;
+
       default:
         return <Home onNavigate={setCurrentPage} onOpenAI={() => setIsAIOpen(true)} />;
     }
