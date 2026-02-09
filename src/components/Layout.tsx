@@ -1,6 +1,8 @@
 import { ReactNode, useState } from 'react';
-import { Bell, Menu, X, Home, ShoppingBag, Repeat, Wallet, Star, Trophy, Heart, User, LogOut, Bot } from 'lucide-react';
+import {  Bell,Menu, X, Home, ShoppingBag, Repeat, Wallet, Star, Trophy, Heart, User, LogOut, Bot, Calendar } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+
+
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,6 +22,8 @@ export default function Layout({ children, currentPage, onNavigate, onOpenAI }: 
     { id: 'wallet', label: 'My Wallet', icon: Wallet },
     { id: 'challenges', label: 'Challenges', icon: Trophy },
     { id: 'wishlist', label: 'Wishlist', icon: Heart },
+    { id: 'expiry-insights', label: 'Expiry Insights', icon: Calendar },
+
   ];
 
   const handleSignOut = async () => {
