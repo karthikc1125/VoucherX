@@ -213,7 +213,7 @@ export default function Wishlist() {
                   <div className="min-w-0">
                     <div className="font-semibold mb-1 truncate">{match.brand}</div>
                     <div className="text-xs sm:text-sm text-white/90">
-                      {match.count} voucher{match.count > 1 ? 's' : ''} • from ${match.lowestPrice}
+                      {match.count} voucher{match.count > 1 ? 's' : ''} • from ${match.lowestPrice} • {match.discount}% off
                     </div>
                   </div>
                   <button className="shrink-0 bg-white text-teal-600 px-4 py-2 rounded-lg font-semibold hover:bg-slate-100 transition-colors text-sm">
