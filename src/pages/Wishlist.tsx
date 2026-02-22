@@ -287,7 +287,7 @@ export default function Wishlist() {
           <div className="text-center py-8 sm:py-16 px-4 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200">
             <Heart className="h-12 w-12 sm:h-16 sm:w-16 text-slate-300 mx-auto mb-4" />
             <h3 className="text-lg sm:text-xl font-semibold text-slate-700 mb-2">Your wishlist is empty</h3>
-            <p className="text-sm sm:text-slate-600 mb-6">Add brands you're interested in to get notified</p>
+            <p className="text-sm text-slate-600 mb-6">Add brands you're interested in to get notified</p>
             <button
               onClick={() => setShowAddForm(true)}
               className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-pink-500 to-red-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all inline-flex items-center justify-center space-x-2"
